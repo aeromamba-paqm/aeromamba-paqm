@@ -121,7 +121,7 @@ python predict_batch_with_ola.py dset=<dset-name> experiment=<experiment-name> +
 `
 ### Checkpoints
 
-To use pre-trained models for MUSDB18-HQ or PianoEval data (both wav and mp3 experiments), one can download checkpoints from [here]([https://poliufrjbr-my.sharepoint.com/:f:/g/personal/abreu_engcb_poli_ufrj_br/EhqOtFGTmeZNr-WNv976Jw8BLfpgBYisodrRb2uTGvrFsg?e=5j1nx4](https://drive.google.com/drive/folders/1FKOagtfJlqx05zdc1rGZq9rBE44x1kAQ?usp=sharing)).
+To use pre-trained models for MUSDB18-HQ or PianoEval data (both wav and mp3 experiments), one can download checkpoints from [here](https://poliufrjbr-my.sharepoint.com/:f:/g/personal/abreu_engcb_poli_ufrj_br/EhqOtFGTmeZNr-WNv976Jw8BLfpgBYisodrRb2uTGvrFsg?e=5j1nx4](https://drive.google.com/drive/folders/1FKOagtfJlqx05zdc1rGZq9rBE44x1kAQ?usp=sharing).
 
 To link to checkpoint when testing or predicting, override/set path under `checkpoint_file:<path>` in `conf/main_config.yaml.` e.g.
 
