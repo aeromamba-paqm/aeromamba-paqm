@@ -71,7 +71,7 @@ Each "egs file" contains meta information about the signals: paths and signal le
 
 `python data_prep/create_meta_files.py <path for 44.1 kHz data> egs/musdb/ hr`
 
-The default configuration assume that the dataset folder is organized as 'datasets/dataset_name/partition', where 'partition' can be train, val, or test.
+The default configuration assume that the dataset folder is organized as 'datasets/dataset_name/partition', where 'partition' can be train, val, or test. We provide a sample of egs folder and files to support the users.
 
 ### Generate MP3 files 
 
