@@ -1,0 +1,6 @@
+# @package dset
+name: musdb-mixture-11-44
+train: /home/wallace.abreu/Mestrado/aero_vanilla/egs/musdb-mixture-11-44/tr
+valid: 
+test: /home/wallace.abreu/Mestrado/aero_vanilla/egs/musdb-mixture-11-44/tt
+

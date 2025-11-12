@@ -11,7 +11,7 @@ Official PyTorch implementation of
 
 **Efficient Audio Super-Resolution with a Differentiable Psychoacoustic Loss**
 
-whose demo is available in our [Webpage](https://aeromamba-paqm.github.io/). Our model is closely related to our previous model [AEROMamba](https://github.com/aeromamba-super-resolution/aeromamba), so make sure to check it out.
+whose demo is available in our [Webpage](https://aeromamba-paqm.github.io/). AEROMamba-PAQM is closely related to our previous model [AEROMamba](https://github.com/aeromamba-super-resolution/aeromamba), which is a particular case that does not use PAQM loss.
 
 ## Installation
 
@@ -25,13 +25,13 @@ Instructions:
 - **Recommended**: Using Anaconda or Miniconda, run `conda env create -f environment.yml -p /home/user/Anaconda3/envs/env_name`
 - Run `pip install -r requirements.txt`
 
-If there is any error in the previous step, make sure to install manually the required libs. For PyTorch/CUDA and Mamba, manual installation is done through 
+Make sure to unzip the contents of [Mamba](https://github.com/state-spaces/mamba/archive/refs/tags/v1.1.3.post1.zip) (the mamba folder) inside `aeromamba-paqm/src/models/` . Some dependecy warnings can be shown in the output, but the installation succeeds.
+
+If there is any error in the previous step, install manually the required libs. For PyTorch/CUDA and Mamba, manual installation is done through 
 
 - `CAUSAL_CONV1D_FORCE_BUILD=TRUE CAUSAL_CONV1D_SKIP_CUDA_BUILD=TRUE CAUSAL_CONV1D_FORCE_CXX11_ABI=TRUE pip install causal_conv1d==1.1.2.post1`
 - `CAUSAL_CONV1D_FORCE_BUILD=TRUE CAUSAL_CONV1D_SKIP_CUDA_BUILD=TRUE CAUSAL_CONV1D_FORCE_CXX11_ABI=TRUE pip install mamba-ssm==1.1.3.post1`
 - `conda install pytorch==1.12.1 torchvision==0.13.1 torchaudio==0.12.1 cudatoolkit=11.3 -c pytorch`
-
-Also, make sure to unzip the contents of [Mamba](https://github.com/state-spaces/mamba/archive/refs/tags/v1.1.3.post1.zip) (the mamba folder) inside `aeromamba-paqm/src/models/` . Some dependecy warnings can be shown in the output, but the installation succeeds.
 
 ### PAQM 
 
@@ -129,7 +129,7 @@ To link to checkpoint when testing or predicting, override/set path under `check
 python test.py dset=<dset-name> experiment=<experiment-name> +checkpoint_file=<path to checkpoint.th file>
 `
 
-Alternatively, make sure that the checkpoint file is in its corresponding output folder:  
+Alternatively, check that the checkpoint file is in its corresponding output folder:  
 For each low to high resolution setting, hydra creates a folder under `outputs/<dset-name>/<experiment-name>`
 
 Make sure that `restart: false` in `conf/main_config.yaml`
