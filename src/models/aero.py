@@ -215,7 +215,7 @@ class HDecLayer(nn.Module):
         return z
 
 
-class AeroMamba(nn.Module):
+class Aero(nn.Module):
     """
     Deep model for Audio Super Resolution.
     """
