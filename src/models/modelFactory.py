@@ -1,11 +1,11 @@
-from src.models.aero import Aero
+from src.models.aero import AeroMamba
 from src.models.seanet import Seanet
 from src.models.discriminators import Discriminator, MultiPeriodDiscriminator, MultiScaleDiscriminator
 
 
 def get_model(args):
     if args.experiment.model == 'aero':
-        generator = Aero(**args.experiment.aero)
+        generator = AeroMamba(**args.experiment.aero)
     elif args.experiment.model == 'seanet':
         generator = Seanet(**args.experiment.seanet)
 

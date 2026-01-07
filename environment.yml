@@ -1,4 +1,4 @@
-name: lamir_test
+name: aeromamba_paqm_env
 channels:
   - pytorch
   - defaults
