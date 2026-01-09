@@ -659,13 +659,6 @@ class Solver(object):
         except:
             #dump 
             print('Discarding batch')
-            print('loss:', loss)
-            print('hr:', hr)
-            print('pr:', pr)
-            print('lr:', lr)
-            torch.save(hr, '/home/wallace.abreu/Mestrado/aeromamba-paqm/debug_paqm/hr2.pt')
-            torch.save(pr, '/home/wallace.abreu/Mestrado/aeromamba-paqm/debug_paqm/pr2.pt')
-            torch.save(lr, '/home/wallace.abreu/Mestrado/aeromamba-paqm/debug_paqm/lr2.pt')
     
         self.optimizer.step()
 
