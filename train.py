@@ -113,7 +113,7 @@ def run(args):
 
     if args.dset.test:
         tt_dataset = LrHrSet(args.dset.test, args.experiment.lr_sr, args.experiment.hr_sr,
-                             stride=80, segment=10, with_path=True, upsample=args.experiment.upsample)  
+                             stride=10, segment=10, with_path=True, upsample=args.experiment.upsample)  
 
         tt_loader = distrib.loader(tt_dataset, batch_size=1, shuffle=False, num_workers=args.num_workers)
     else:
@@ -174,7 +174,7 @@ def _main(args):
     wandb.finish()
 
 
-@hydra.main(config_path="conf", config_name="main_config_paqm++")  # for latest version of hydra=1.0
+@hydra.main(config_path="conf", config_name="main_config")  # for latest version of hydra=1.0
 def main(args):
     try:
         _main(args)
