@@ -62,7 +62,7 @@ def _load_model(args):
     return model
 
 
-@hydra.main(config_path="conf", config_name="main_config_paqm++")  # for latest version of hydra=1.0
+@hydra.main(config_path="conf", config_name="main_config_ps")  # for latest version of hydra=1.0
 def main(args):
     global __file__
     __file__ = hydra.utils.to_absolute_path(__file__)
