@@ -9,7 +9,7 @@ This work is currently subject to review by the Journal of the Audio Engineering
 ## About 
 Official PyTorch implementation of 
 
-**Efficient Audio Super-Resolution with a Differentiable Psychoacoustic Loss**
+**Efficient Audio Enhancement with a Differentiable Psychoacoustic Loss**
 
 whose demo is available in our [Webpage](https://aeromamba-paqm.github.io/). $\textrm{AEROMamba}_{\textrm{P}}$ is closely related to our previous model [AEROMamba](https://github.com/aeromamba-super-resolution/aeromamba), which is a particular case that does not use PAQM loss.
 
