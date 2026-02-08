@@ -1,5 +1,5 @@
 # @package experiment
-name: aeromamba_paqm
+name: aeromamba_p
 
 #Dataset related
 lr_sr: 11025 # low resolution sample rate, added to support BWE. Should be included in training cfg
