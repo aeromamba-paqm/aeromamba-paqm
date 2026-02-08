@@ -80,7 +80,7 @@ folder.
 
 ## Train
 
-You can run $\textrm{AEROMamba}_{\textrm{P}}$ or $\textrm{AEROMamba}_{\textrm{P} \bar{\textrm{S}}}$ depending on the `maing_config` files located in the `conf` folder. The difference between them is whether the PAQM loss is present or absent. The experiment
+You can run $\textrm{AEROMamba}\_{\textrm{P}}$ or $\textrm{AEROMamba}\_{\textrm{P}\bar{\textrm{S}}}$ depending on the `maing_config` files located in the `conf` folder. The difference between them is whether the PAQM loss is present or absent. The experiment
 .yaml files control the gamma factor that weights the PAQM loss.
 
 Run `train.py` with `dset` and `experiment` parameters, or set the default values in main_config.yaml file.  
