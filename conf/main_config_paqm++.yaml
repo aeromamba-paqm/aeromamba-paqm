@@ -1,5 +1,5 @@
 defaults:
-  - experiment: aeromamba_paqm++
+  - experiment: aeromamba_ps
   - dset: chopin-11-44-tiny
   - override hydra/job_logging: colorlog
   - override hydra/hydra_logging: colorlog
