@@ -65,13 +65,13 @@ def run(args):
         filtered_lr_set = []
         filtered_hr_set = []
         for i in tqdm(range(len(tr_dataset.lr_set)), desc='Filtering Training items based on power threshold'):
-            lr_signal = tr_dataset.lr_set[i]
-            hr_signal = tr_dataset.hr_set[i]
+            lr_signal, lr_sr = tr_dataset.lr_set[i]
+            hr_signal, hr_sr = tr_dataset.hr_set[i]
             if hr_signal is not None:
                 hr_power = torch.square(hr_signal).sum() / args.experiment.hr_sr
                 if hr_power >= args.experiment.power_threshold:
-                    filtered_lr_set.append(lr_signal)
-                    filtered_hr_set.append(hr_signal)
+                    filtered_lr_set.append((lr_signal, lr_sr))
+                    filtered_hr_set.append((hr_signal, hr_sr))
 
         # Replace lr_set and hr_set with filtered lists
         print(f"Kept {len(filtered_lr_set)} / {len(tr_dataset.lr_set)} training items.")
@@ -81,8 +81,8 @@ def run(args):
     tr_loader = distrib.loader(tr_dataset, batch_size=args.experiment.batch_size, shuffle=True,
                                num_workers=args.num_workers)
 
-    if args.dset.valid:
-        args.valid_equals_test = args.dset.valid == args.dset.test
+    # if args.dset.valid:
+    #     args.valid_equals_test = args.dset.valid == args.dset.test
 
     if args.dset.valid:
         cv_dataset = LrHrSet(args.dset.valid, args.experiment.lr_sr, args.experiment.hr_sr,
@@ -94,13 +94,13 @@ def run(args):
             cv_filtered_lr_set = []
             cv_filtered_hr_set = []
             for i in tqdm(range(len(cv_dataset.lr_set)), desc='Filtering Validation items based on power threshold'):
-                lr_signal = cv_dataset.lr_set[i]
-                hr_signal = cv_dataset.hr_set[i]
+                lr_signal, lr_sr = cv_dataset.lr_set[i]
+                hr_signal, hr_sr = cv_dataset.hr_set[i]
                 if hr_signal is not None:
                     hr_power = torch.square(hr_signal).sum() / args.experiment.hr_sr
                     if hr_power >= args.experiment.power_threshold:
-                        cv_filtered_lr_set.append(lr_signal)
-                        cv_filtered_hr_set.append(hr_signal)
+                        cv_filtered_lr_set.append((lr_signal, lr_sr))
+                        cv_filtered_hr_set.append((hr_signal, hr_sr))
 
             # Replace lr_set and hr_set with filtered lists
             print(f"Kept {len(cv_filtered_lr_set)} / {len(cv_dataset.lr_set)} validation items.")

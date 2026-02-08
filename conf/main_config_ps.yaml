@@ -1,5 +1,5 @@
 defaults:
-  - experiment: aeromamba_p
+  - experiment: aeromamba_ps
   - dset: chopin-11-44-tiny
   - override hydra/job_logging: colorlog
   - override hydra/hydra_logging: colorlog
@@ -16,7 +16,6 @@ log_results: true
 
 # Checkpointing, by default automatically load last checkpoint
 checkpoint: true
-checkpoint_every: 5  # epochs
 continue_from: '' # Path the a checkpoint.th file to start from.
 # this is not used in the name of the experiment!
 # so use a dummy=something not to mixup experiment.
@@ -46,7 +45,7 @@ evaluate_on_best: False
 
 #wand_b
 wandb:
-  project_name: 'AEROMamba_P Test'
+  project_name: 'AEROMamba_PS Test'
   entity: #optional, must exist beforehand in wandb account
   mode: online  # online/offline/disabled
   log: all # gradients/parameters/all/None
@@ -61,7 +60,7 @@ optim: adam
 lr: 3e-4
 beta1: 0.8
 beta2: 0.999
-losses: [ stft,paqm ]
+losses: [ paqm ]
 stft_sc_factor: .5
 stft_mag_factor: .5
 epochs: 696
