@@ -1,4 +1,4 @@
-# AEROMamba-PAQM
+# $\textrm{AEROMamba}_{\textrm{P}}$
 
 <p align="center">
 <img width="250" height="250" alt="icon_tp" src="https://github.com/user-attachments/assets/09c8be4c-d782-442c-bec2-b652dccfae7d" />
@@ -9,9 +9,9 @@ This work is currently subject to review by the Journal of the Audio Engineering
 ## About 
 Official PyTorch implementation of 
 
-**Efficient Audio Super-Resolution with a Differentiable Psychoacoustic Loss**
+**Efficient Audio Enhancement with a Differentiable Psychoacoustic Loss**
 
-whose demo is available in our [Webpage](https://aeromamba-paqm.github.io/). AEROMamba-PAQM is closely related to our previous model [AEROMamba](https://github.com/aeromamba-super-resolution/aeromamba), which is a particular case that does not use PAQM loss.
+whose demo is available in our [Webpage](https://aeromamba-paqm.github.io/). $\textrm{AEROMamba}_{\textrm{P}}$ is closely related to our previous model [AEROMamba](https://github.com/aeromamba-super-resolution/aeromamba), which is a particular case that does not use PAQM loss.
 
 ## Installation
 
@@ -35,7 +35,7 @@ If there is any error in the previous step, install manually the required libs. 
 
 ### PAQM 
 
-The PAQM loss function is implemented as a standalone package in [torchpaqm](https://github.com/bvm810/torchpaqm). In the case of AEROMamba-PAQM, we use it directly via the `src/paqm` folder. Check the main repo to keep up with updates in the module!
+The PAQM loss function is implemented as a standalone package in [torchpaqm](https://github.com/bvm810/torchpaqm). In the case of $\textrm{AEROMamba}_{\textrm{P}}$, we use it directly via the `src/paqm` folder. Check the main repo to keep up with updates in the module!
 
 -  **Important:** sometimes, in the first epochs of training with PAQM, the backward propagation can throw an error. This is treated by our code, as long as the anomaly detection is set to `True`. Just keep
   training anyways.
@@ -80,7 +80,7 @@ folder.
 
 ## Train
 
-You can run AEROMamba-PAQM or AEROMamba-PAQM++ depending on the `maing_config` files located in the `conf` folder. The difference between them is whether the PAQM loss is present or absent. The experiment
+You can run $\textrm{AEROMamba}\_{\textrm{P}}$ or $\textrm{AEROMamba}\_{\textrm{P}\bar{\textrm{S}}}$ depending on the `maing_config` files located in the `conf` folder. The difference between them is whether the PAQM loss is present or absent. The experiment
 .yaml files control the gamma factor that weights the PAQM loss.
 
 Run `train.py` with `dset` and `experiment` parameters, or set the default values in main_config.yaml file.  
