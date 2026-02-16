@@ -219,7 +219,7 @@ class DConv(nn.Module):
 
             layer.update({'conv1': nn.Sequential(*conv1), 'act': act_layer, 'conv2': nn.Sequential(*conv2)})
             if mamba:
-                layer.update({'mamba': Mamba(channels, d_state, d_conv, expand)})
+                layer.update({'mamba': Mamba(self.hidden, d_state, d_conv, expand)})
             if lstm:
                 layer.update({'lstm': BLSTM(self.hidden, layers=2, max_steps=200, skip=True)})
             if time_attn:
@@ -248,7 +248,10 @@ class DConv(nn.Module):
                 x = layer['lstm'](x)
             if self.time_attn:
                 x = layer['time_attn'](x)
-
+            if self.mamba:
+                x = x.transpose(1, 2)
+                x = layer['mamba'](x)
+                x = x.transpose(1, 2)
             x = layer['conv2'](x)
             x = skip + x
 
