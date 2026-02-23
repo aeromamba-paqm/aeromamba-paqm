@@ -19,6 +19,9 @@ from torchaudio.transforms import Spectrogram
 from src.data.audio import Audioset
 from src.utils import match_signal
 
+from concurrent.futures import ThreadPoolExecutor
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -122,10 +125,11 @@ class LrHrSet(Dataset):
         with open(hr_json, 'r') as f:
             hr = json.load(f)
 
-        lr_stride = stride * lr_sr if stride else None
         hr_stride = stride * hr_sr if stride else None
-        lr_length = segment * lr_sr if segment else None
         hr_length = segment * hr_sr if segment else None
+
+        lr_stride = stride * lr_sr if (stride and lr_sr) else stride
+        lr_length = segment * lr_sr if (segment and lr_sr) else segment
 
         match_files(lr, hr)
         self.lr_set = Audioset(lr, sample_rate=lr_sr, length=lr_length, stride=lr_stride, pad=pad, channels=1,
@@ -141,14 +145,19 @@ class LrHrSet(Dataset):
     def __getitem__(self, index):
         if self.fixed_n_examples is not None:
             index = random.sample(range(len(self.hr_set)), 1)[0]
+        lr_data = self.lr_set[index]
+        hr_data = self.hr_set[index]
+
         if self.with_path:
-            hr_sig, hr_path = self.hr_set[index]
-            lr_sig, lr_path = self.lr_set[index]
+            (lr_sig, lr_sr), lr_path = lr_data
+            (hr_sig, _), hr_path = hr_data
         else:
-            hr_sig = self.hr_set[index]
-            lr_sig = self.lr_set[index]
+            lr_sig, lr_sr = lr_data
+            hr_sig, _ = hr_data
+        
+        #detect sr for upsampling    
         if self.upsample:
-            lr_sig = resample(lr_sig, self.lr_sr, self.hr_sr)
+            lr_sig = resample(lr_sig, lr_sr, self.hr_sr)
             lr_sig = match_signal(lr_sig, hr_sig.shape[-1])
 
         if self.stft:
