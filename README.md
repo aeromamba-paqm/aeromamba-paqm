@@ -37,8 +37,7 @@ If there is any error in the previous step, install manually the required libs. 
 
 The PAQM loss function is implemented as a standalone package in [torchpaqm](https://github.com/bvm810/torchpaqm). In the case of $\textrm{AEROMamba}_{\textrm{P}}$, we use it directly via the `src/paqm` folder. Check the main repo to keep up with updates in the module!
 
--  **Important:** sometimes, in the first epochs of training with PAQM, the backward propagation can throw an error. This is treated by our code, as long as the anomaly detection is set to `True`. Just keep
-  training anyways.
+-  **Important:** sometimes, when training with PAQM, the backward propagation can throw an error. This is treated by our code, and the invalid batches are discarded. Just keep training anyways.
   
 
 ### ViSQOL
