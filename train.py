@@ -26,7 +26,6 @@ def run(args):
     from src.solver import Solver
     logger.info(f'calling distrib.init')
     distrib.init(args)
-    torch.autograd.set_detect_anomaly(True)
 
     _init_wandb_run(args)
 

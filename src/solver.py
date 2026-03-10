@@ -306,9 +306,10 @@ class Solver(object):
             if distrib.rank == 0:
                 json.dump(self.history, open(self.history_file, "w"), indent=2)
                 # Save model each epoch
-                if self.checkpoint:
-                        serialize(self.models, self.optimizers, self.history, self.best_states, self.args)
-                        logger.debug("Checkpoint saved to %s", self.checkpoint_file.resolve())
+                if self.checkpoint and ((epoch + 1) % self.args.checkpoint_every == 0 or epoch == self.epochs - 1):
+                    logger.info("Saving checkpoint...")
+                    serialize(self.models, self.optimizers, self.history, self.best_states, self.args)
+                    logger.debug("Checkpoint saved to %s", self.checkpoint_file.resolve())
 
 
     def _run_one_epoch(self, epoch, cross_valid=False):
@@ -329,7 +330,11 @@ class Solver(object):
         for i, data in enumerate(logprog):
             lr, hr = [x.to(self.device) for x in data]
             if return_spec:
-                pr_time, pr_spec = self.dmodel(lr, return_spec=return_spec)
+                if self.args.experiment.model == 'faeromamba':
+                    pr_time, pr_spec = self.dmodel(lr, lr_sr=lr_sr, return_spec=return_spec)
+                else:
+                    pr_time, pr_spec = self.dmodel(lr, return_spec=return_spec)
+                    
                 if cross_valid:
                     pr_time = match_signal(pr_time, hr.shape[-1])
                 hr_spec = self.dmodel._spec(hr, scale=True)
@@ -350,17 +355,44 @@ class Solver(object):
             for loss_name, loss in losses['generator'].items():
                 total_generator_loss += loss
 
+            # if loss is NaN/Inf, skip the optimization and logging
+            if not torch.isfinite(total_generator_loss):
+                logger.warning(f"Batch {i} generated NaN loss. Skipping batch.")
+                if not cross_valid:
+                    self.optimizer.zero_grad(set_to_none=True)
+                    if self.adversarial_mode:
+                        self.disc_optimizers['disc_optimizer'].zero_grad(set_to_none=True)
+                continue 
+            
+            #------------------------DEBUGGING CODE FOR NAN LOSSES----------------------------------------
+            #----------------------------------------------------------------------------------------------    
+            # Create a debug directory inside your samples folder
+            # debug_dir = os.path.join(self.args.samples_dir, 'nan_debug')
+            # os.makedirs(debug_dir, exist_ok=True)
+            
+            # # Save the audio for listening (squeezing out the batch dimension)
+            # import torchaudio
+            # torchaudio.save(os.path.join(debug_dir, f'batch_{i}_hr.wav'), hr.detach().cpu().squeeze(0), self.args.experiment.hr_sr)
+            # torchaudio.save(os.path.join(debug_dir, f'batch_{i}_pr.wav'), pr_time.detach().cpu().squeeze(0), self.args.experiment.hr_sr)
+            # torchaudio.save(os.path.join(debug_dir, f'batch_{i}_lr.wav'), lr.detach().cpu().squeeze(0), self.args.experiment.hr_sr)
+
+            # # Save the exact tensors to recreate the math crash later
+            # torch.save({
+            #     'hr': hr.detach().cpu(), 
+            #     'pr': pr_time.detach().cpu()
+            # }, os.path.join(debug_dir, f'batch_{i}_tensors.pt'))
+            #----------------------------------------------------------------------------------------------    
+                
             # optimize model in training mode
             if not cross_valid:
                 try:
                     self._optimize(total_generator_loss, hr, pr_time, lr)
-                except:
-                    logger.error("Error while optimizing model")
-                    print('loss:', total_generator_loss)
-
-                    raise
+                except Exception as e:
+                    logger.error(f"Error while optimizing model: {e}")
+                    continue # skip logging if backward crashed
+                
                 if self.adversarial_mode:
-                    self._optimize_adversarial(losses['discriminator'])
+                    self._optimize_adversarial(losses['discriminator'])            
             total_loss += total_generator_loss.item()
             for loss_name, loss in losses['generator'].items():
                 total_loss_name = 'generator_' + loss_name
@@ -470,49 +502,49 @@ class Solver(object):
         pr_time = pr['time']
 
         losses = {'generator': {}, 'discriminator': {}}
-        with torch.autograd.set_detect_anomaly(True):
-            if 'l1' in self.args.losses:
-                losses['generator'].update({'l1': F.l1_loss(pr_time, hr_time)})
-            if 'l2' in self.args.losses:
-                losses['generator'].update({'l2': F.mse_loss(pr_time, hr_time)})
-            if 'stft' in self.args.losses or 'mod_stft' in self.args.losses:
-                stft_loss = self._get_stft_loss(pr_time, hr_time)
-                losses['generator'].update({'stft': stft_loss})
-            if 'paqm' in self.args.losses:
-                pr_48 = self.resample(pr_time.squeeze())
-                hr_48 = self.resample(hr_time.squeeze())
-                ev = PAQM(pr_48, hr_48)
-                mos = ev.mean_opinion_score
-                mos = mos.nanmean()
-                #mos = torch.clamp(mos, 0, 5)
-                losses['generator'].update({'mos': -self.args.experiment.gamma_paqm * mos})
-                
-            if self.adversarial_mode:
-                if 'msd_melgan' in self.args.experiment.discriminator_models:
-                    generator_losses, discriminator_loss = self._get_melgan_adversarial_loss(pr_time, hr_time)
-                    if not self.args.experiment.only_features_loss:
-                        losses['generator'].update({'adversarial_melgan': generator_losses['adversarial']})
-                    if not self.args.experiment.only_adversarial_loss:
-                        losses['generator'].update({'features_melgan': generator_losses['features']})
-                    losses['discriminator'].update({'msd_melgan': discriminator_loss})
-                if 'msd_hifi' in self.args.experiment.discriminator_models:
-                    generator_losses, discriminator_loss = self._get_msd_adversarial_loss(pr_time, hr_time)
-                    if not self.args.experiment.only_features_loss:
-                        losses['generator'].update({'adversarial_msd': generator_losses['adversarial']})
-                    if not self.args.experiment.only_adversarial_loss:
-                        losses['generator'].update({'features_msd': generator_losses['features']})
-                    losses['discriminator'].update({'msd': discriminator_loss})
-                if 'mpd' in self.args.experiment.discriminator_models:
-                    generator_losses, discriminator_loss = self._get_mpd_adversarial_loss(pr_time, hr_time)
-                    if not self.args.experiment.only_features_loss:
-                        losses['generator'].update({'adversarial_mpd': generator_losses['adversarial']})
-                    if not self.args.experiment.only_adversarial_loss:
-                        losses['generator'].update({'features_mpd': generator_losses['features']})
-                    losses['discriminator'].update({'mpd': discriminator_loss})
-                if 'hifi' in self.args.experiment.discriminator_models:
-                    generator_loss, discriminator_loss = self._get_hifi_adversarial_loss(pr_time, hr_time)
-                    losses['generator'].update({'adversarial_hifi': generator_loss})
-                    losses['discriminator'].update({'hifi': discriminator_loss})
+        
+        if 'l1' in self.args.losses:
+            losses['generator'].update({'l1': F.l1_loss(pr_time, hr_time)})
+        if 'l2' in self.args.losses:
+            losses['generator'].update({'l2': F.mse_loss(pr_time, hr_time)})
+        if 'stft' in self.args.losses or 'mod_stft' in self.args.losses:
+            stft_loss = self._get_stft_loss(pr_time, hr_time)
+            losses['generator'].update({'stft': stft_loss})
+        if 'paqm' in self.args.losses:
+            pr_48 = self.resample(pr_time.squeeze())
+            hr_48 = self.resample(hr_time.squeeze())
+            ev = PAQM(pr_48, hr_48)
+            mos = ev.mean_opinion_score
+            mos = mos.nanmean()
+            #mos = torch.clamp(mos, 0, 5)
+            losses['generator'].update({'mos': -self.args.experiment.gamma_paqm * mos})
+            
+        if self.adversarial_mode:
+            if 'msd_melgan' in self.args.experiment.discriminator_models:
+                generator_losses, discriminator_loss = self._get_melgan_adversarial_loss(pr_time, hr_time)
+                if not self.args.experiment.only_features_loss:
+                    losses['generator'].update({'adversarial_melgan': generator_losses['adversarial']})
+                if not self.args.experiment.only_adversarial_loss:
+                    losses['generator'].update({'features_melgan': generator_losses['features']})
+                losses['discriminator'].update({'msd_melgan': discriminator_loss})
+            if 'msd_hifi' in self.args.experiment.discriminator_models:
+                generator_losses, discriminator_loss = self._get_msd_adversarial_loss(pr_time, hr_time)
+                if not self.args.experiment.only_features_loss:
+                    losses['generator'].update({'adversarial_msd': generator_losses['adversarial']})
+                if not self.args.experiment.only_adversarial_loss:
+                    losses['generator'].update({'features_msd': generator_losses['features']})
+                losses['discriminator'].update({'msd': discriminator_loss})
+            if 'mpd' in self.args.experiment.discriminator_models:
+                generator_losses, discriminator_loss = self._get_mpd_adversarial_loss(pr_time, hr_time)
+                if not self.args.experiment.only_features_loss:
+                    losses['generator'].update({'adversarial_mpd': generator_losses['adversarial']})
+                if not self.args.experiment.only_adversarial_loss:
+                    losses['generator'].update({'features_mpd': generator_losses['features']})
+                losses['discriminator'].update({'mpd': discriminator_loss})
+            if 'hifi' in self.args.experiment.discriminator_models:
+                generator_loss, discriminator_loss = self._get_hifi_adversarial_loss(pr_time, hr_time)
+                losses['generator'].update({'adversarial_hifi': generator_loss})
+                losses['discriminator'].update({'hifi': discriminator_loss})
         return losses
 
     def _get_stft_loss(self, pr, hr):
@@ -653,13 +685,29 @@ class Solver(object):
         return -loss
     
     def _optimize(self, loss, hr, pr, lr):
-        self.optimizer.zero_grad()
+        self.optimizer.zero_grad(set_to_none=True)
+
+        if not torch.isfinite(loss):
+            logger.warning(f"Loss is {loss.item()}. Discarding batch.")
+            return 
+
         try:
             loss.backward()
-        except:
-            #dump 
-            print('Discarding batch')
-    
+        except Exception as e:
+            logger.error(f"Discarding batch due to backward failure: {e}")
+            return 
+
+        has_nans = False
+        for param in self.model.parameters():
+            if param.grad is not None and not torch.isfinite(param.grad).all():
+                has_nans = True
+                break
+                
+        if has_nans:
+            logger.warning("NaN/Inf gradients detected. Discarding batch.")
+            self.optimizer.zero_grad(set_to_none=True) 
+            return 
+
         self.optimizer.step()
 
     def _optimize_adversarial(self, discriminator_losses):
