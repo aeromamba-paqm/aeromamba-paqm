@@ -4,8 +4,6 @@
 <img width="250" height="250" alt="icon_tp" src="https://github.com/user-attachments/assets/09c8be4c-d782-442c-bec2-b652dccfae7d" />
 </p>
 
-This work is currently subject to review by the Journal of the Audio Engineering Society.
-
 ## About 
 Official PyTorch implementation of 
 
@@ -133,4 +131,17 @@ For each low to high resolution setting, hydra creates a folder under `outputs/<
 
 Make sure that `restart: false` in `conf/main_config.yaml`
 
-      
+### Citation
+
+```
+@article{Abreu2026efficient, 
+title={{Efficient Audio Enhancement With a Differentiable Psychoacoustic Loss}}, 
+author={Abreu, Wallace and Miranda, Bernardo V. and Biscainho, Luiz W. P.}, 
+year={2026}, 
+month={jun}, 
+journal={Journal of the Audio Engineering Society}, 
+volume={74}, 
+number={6}, 
+pages={430-444}, 
+}
+```   
